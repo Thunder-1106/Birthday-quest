@@ -1,0 +1,2784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>King Aadesh's Nameday | Game of Thrones 3D Chronicle</title>
+  
+  <!-- Medieval & Gothic Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@500;700;900&family=MedievalSharp&family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;1,400&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- 3D Graphics & Animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* ============================================================
+       WESTEROS CORE STYLES & GOTHIC DESIGN TOKENS
+       ============================================================ */
+    :root {
+      --gold-primary: #f5c542;
+      --gold-light: #ffe885;
+      --gold-dark: #b38600;
+      --gold-gradient: linear-gradient(135deg, #ffe885 0%, #d4af37 50%, #7d5e1a 100%);
+      --blood-red: #8b0000;
+      --crimson: #c41e3a;
+      --flame-orange: #ff4500;
+      --valyrian-dark: #070709;
+      --iron-dark: #121316;
+      --stone-wall: #18191f;
+      --text-parchment: #ece2ce;
+      --text-muted: #a39b8b;
+      --parchment-gold: #e8dcc4;
+      --shadow-epic: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 35px rgba(212, 175, 55, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--valyrian-dark);
+      color: var(--text-parchment);
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    h1, h2, h3, h4, .cinzel {
+      font-family: 'Cinzel', serif;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .cinzel-dec {
+      font-family: 'Cinzel Decorative', serif;
+    }
+
+    .medieval {
+      font-family: 'MedievalSharp', cursive;
+    }
+
+    /* Ambient Ember Canvas Overlay */
+    #ambient-fire-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .vignette-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at center, transparent 30%, rgba(3, 3, 5, 0.92) 90%);
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    /* ============================================================
+       TOP ROYAL HUD & CITADEL SOUNDTRACK SELECTOR
+       ============================================================ */
+    .top-royal-hud {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 64px;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      background: linear-gradient(180deg, rgba(8, 8, 11, 0.98) 0%, rgba(8, 8, 11, 0.7) 80%, transparent 100%);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .brand-sigil {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid var(--gold-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle, #382410 0%, #0d0a08 100%);
+      color: var(--gold-light);
+      box-shadow: 0 0 15px rgba(245, 197, 66, 0.5);
+      font-size: 1.25rem;
+    }
+
+    .chapter-indicator {
+      font-family: 'Cinzel', serif;
+      font-size: 0.82rem;
+      color: var(--gold-primary);
+      letter-spacing: 2px;
+      background: rgba(22, 18, 14, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      padding: 6px 16px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Jukebox Track Selector */
+    .audio-controls-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .track-select-box {
+      background: rgba(20, 18, 17, 0.9);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: var(--gold-light);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.72rem;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .btn-audio-toggle {
+      background: rgba(20, 18, 17, 0.9);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: var(--gold-light);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    .btn-audio-toggle:hover {
+      background: var(--gold-dark);
+      color: #000;
+      box-shadow: 0 0 15px rgba(245, 197, 66, 0.6);
+    }
+
+    /* ============================================================
+       BOTTOM NAVIGATION DOCK (ACTS DECK)
+       ============================================================ */
+    .bottom-nav-dock {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      background: linear-gradient(0deg, rgba(8, 8, 11, 0.98) 0%, rgba(8, 8, 11, 0.7) 80%, transparent 100%);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .btn-page-nav {
+      background: linear-gradient(135deg, #2b1f13 0%, #15100a 100%);
+      border: 1px solid rgba(212, 175, 55, 0.5);
+      color: var(--gold-light);
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+    }
+
+    .btn-page-nav:hover {
+      background: var(--gold-gradient);
+      color: #0b0907;
+      border-color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(245, 197, 66, 0.7);
+    }
+
+    .btn-page-nav:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .chapter-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chapter-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      border: 1px solid rgba(212, 175, 55, 0.5);
+      background: rgba(20, 20, 25, 0.8);
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .chapter-dot:hover {
+      border-color: var(--gold-light);
+      transform: scale(1.2);
+    }
+
+    .chapter-dot.active {
+      background: var(--gold-primary);
+      box-shadow: 0 0 12px var(--gold-primary);
+      transform: scale(1.35);
+      border-color: #fff;
+    }
+
+    .chapter-dot::after {
+      content: attr(data-title);
+      position: absolute;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 10, 14, 0.95);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-light);
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .chapter-dot:hover::after { opacity: 1; }
+
+    /* ============================================================
+       STORY VIEWPORT & CHAPTER PAGES (SEPARATE STAGES)
+       ============================================================ */
+    .story-viewport {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .story-page {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 75px 20px 85px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.96) translateY(20px);
+      transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+      z-index: 5;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .story-page.active-page {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+      z-index: 20;
+    }
+
+    .page-header {
+      margin-bottom: 20px;
+      max-width: 800px;
+    }
+
+    .page-subtitle {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 4px;
+      color: var(--gold-primary);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .page-subtitle::before, .page-subtitle::after {
+      content: '';
+      width: 30px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-primary));
+    }
+    .page-subtitle::after { background: linear-gradient(90deg, var(--gold-primary), transparent); }
+
+    .page-title {
+      font-size: clamp(1.8rem, 4.5vw, 3.2rem);
+      font-weight: 900;
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    .page-desc {
+      font-size: clamp(0.85rem, 1.8vw, 1.05rem);
+      color: var(--text-parchment);
+      max-width: 650px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    .king-name-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(25, 20, 15, 0.8);
+      border: 1px solid var(--gold-primary);
+      padding: 4px 16px;
+      border-radius: 20px;
+      color: var(--gold-light);
+      font-family: 'Cinzel Decorative', serif;
+      font-weight: 700;
+      box-shadow: 0 0 15px rgba(245, 197, 66, 0.3);
+      margin: 10px 0;
+    }
+
+    .king-name-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffd778;
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.1rem, 3vw, 1.8rem);
+      font-weight: 900;
+      text-align: center;
+      min-width: 140px;
+      cursor: text;
+      border-bottom: 1px dashed rgba(245, 197, 66, 0.5);
+    }
+
+    /* ============================================================
+       ACT 1: THE BLOOD WAX SEAL & 3D MEDALLION (HERO)
+       ============================================================ */
+    #page-seal {
+      background: radial-gradient(circle at center, #1b130e 0%, #070709 85%);
+      position: relative;
+    }
+
+    #hero-three-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.85;
+    }
+
+    .seal-interact-box {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    .wax-seal-button {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #b22222, #7a0000 65%, #3d0000 100%);
+      border: 4px solid #d44d4d;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.95), 0 0 45px rgba(178, 34, 34, 0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #ffd778;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .wax-seal-button:hover {
+      transform: scale(1.08);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 60px rgba(255, 69, 0, 0.9);
+    }
+
+    .wax-seal-button i {
+      font-size: 3.5rem;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8));
+    }
+
+    .wax-seal-button span {
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      margin-top: 6px;
+      font-weight: 700;
+      color: #fff2cc;
+    }
+
+    /* ============================================================
+       ACT 2: AUTHENTIC GAME OF THRONES MAP OF WESTEROS
+       ============================================================ */
+    #page-map {
+      background: radial-gradient(circle at center, #191410 0%, #060608 85%);
+    }
+
+    .map-frame-box {
+      position: relative;
+      width: 100%;
+      max-width: 1000px;
+      height: 520px;
+      border: 2px solid #634d28;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-epic);
+      background-color: #1a1612;
+    }
+
+    .map-artwork {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #110e0c;
+      filter: contrast(1.15) brightness(0.9);
+      transition: transform 0.5s ease;
+    }
+
+    .map-hotspot {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.3s;
+      z-index: 25;
+    }
+
+    .map-hotspot:hover {
+      transform: translate(-50%, -50%) scale(1.2);
+      z-index: 35;
+    }
+
+    .hotspot-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #382815 0%, #110d08 100%);
+      border: 2px solid var(--gold-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-light);
+      font-size: 1.2rem;
+      box-shadow: 0 0 20px rgba(245, 197, 66, 0.6);
+    }
+
+    .hotspot-text {
+      margin-top: 4px;
+      background: rgba(12, 10, 14, 0.94);
+      border: 1px solid rgba(212, 175, 55, 0.5);
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.68rem;
+      color: #ffd778;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    #spot-winterfell { top: 24%; left: 45%; }
+    #spot-thewall    { top: 12%; left: 48%; }
+    #spot-dragonstone{ top: 58%; left: 62%; }
+    #spot-kingslanding{ top: 65%; left: 52%; }
+    #spot-casterly   { top: 62%; left: 32%; }
+    #spot-highgarden { top: 76%; left: 36%; }
+    #spot-asshai     { top: 84%; left: 82%; }
+
+    .map-flyout {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120%);
+      width: 90%;
+      max-width: 600px;
+      background: rgba(16, 14, 18, 0.96);
+      border: 1px solid var(--gold-primary);
+      border-radius: 14px;
+      padding: 16px 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.95), 0 0 30px rgba(212, 175, 55, 0.3);
+      backdrop-filter: blur(10px);
+      z-index: 40;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      text-align: left;
+    }
+
+    .map-flyout.active { transform: translateX(-50%) translateY(0%); }
+
+    .flyout-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--gold-primary);
+      flex-shrink: 0;
+      box-shadow: 0 0 15px rgba(245, 197, 66, 0.4);
+    }
+
+    /* ============================================================
+       ACT 3: ROYAL AUDIENCE (DISTINCT VOICE AUDIO ENGINE + 9 CHARACTERS)
+       ============================================================ */
+    #page-characters {
+      background: radial-gradient(circle at center, #1b1612 0%, #080709 85%);
+    }
+
+    .char-carousel-deck {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .char-avatar-bar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      width: 100%;
+      padding: 8px 4px;
+    }
+
+    .avatar-btn {
+      background: rgba(22, 18, 16, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      padding: 6px 12px;
+      border-radius: 30px;
+      color: var(--text-muted);
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.3s;
+      flex-shrink: 0;
+    }
+
+    .avatar-btn img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--gold-primary);
+    }
+
+    .avatar-btn:hover, .avatar-btn.selected {
+      background: radial-gradient(circle, #3d2b15, #150f08);
+      color: var(--gold-light);
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 20px rgba(245, 197, 66, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .char-card-stage {
+      position: relative;
+      width: 100%;
+      max-width: 950px;
+      min-height: 480px;
+      background: radial-gradient(circle at 70% 30%, rgba(60, 40, 20, 0.4), rgba(12, 10, 14, 0.98) 75%);
+      border: 1px solid rgba(212, 175, 55, 0.45);
+      border-radius: 20px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1.05fr 1.3fr;
+      box-shadow: var(--shadow-epic);
+      text-align: left;
+    }
+
+    @media (max-width: 820px) {
+      .char-card-stage {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+    }
+
+    .char-image-pane {
+      position: relative;
+      min-height: 380px;
+      overflow: hidden;
+      background: #0a090d;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .char-portrait-img {
+      width: 100%;
+      height: 100%;
+      max-height: 540px;
+      object-fit: cover;
+      object-position: top center;
+      transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .char-card-stage:hover .char-portrait-img {
+      transform: scale(1.04);
+    }
+
+    .char-badge-flair {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(10, 8, 12, 0.88);
+      border: 1px solid var(--gold-primary);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      color: #ffd778;
+      backdrop-filter: blur(4px);
+      z-index: 5;
+    }
+
+    .char-interact-pane {
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: rgba(16, 14, 18, 0.85);
+      backdrop-filter: blur(6px);
+    }
+
+    .char-speech-bubble {
+      background: rgba(28, 24, 20, 0.95);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-left: 4px solid var(--gold-primary);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    }
+
+    .char-speech-text {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: #f7efe1;
+    }
+
+    .char-speech-text span.king-mention {
+      color: #ffd778;
+      font-weight: 700;
+      text-decoration: underline;
+    }
+
+    .voice-control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .btn-voice-speak {
+      background: linear-gradient(135deg, #c41e3a 0%, #7a0000 100%);
+      border: 1px solid #ff4d4d;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(196, 30, 58, 0.5);
+      transition: all 0.3s;
+    }
+
+    .btn-voice-speak:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(255, 77, 77, 0.8);
+    }
+
+    .speaking-wave-bars {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 20px;
+    }
+
+    .s-bar {
+      width: 4px;
+      background: #ff4d4d;
+      border-radius: 2px;
+      height: 4px;
+      transition: height 0.15s;
+    }
+
+    .speaking-wave-bars.active .s-bar:nth-child(1) { animation: voiceBeat 0.5s infinite alternate; }
+    .speaking-wave-bars.active .s-bar:nth-child(2) { animation: voiceBeat 0.35s infinite alternate 0.1s; }
+    .speaking-wave-bars.active .s-bar:nth-child(3) { animation: voiceBeat 0.6s infinite alternate 0.2s; }
+    .speaking-wave-bars.active .s-bar:nth-child(4) { animation: voiceBeat 0.4s infinite alternate 0.15s; }
+
+    @keyframes voiceBeat {
+      0% { height: 4px; }
+      100% { height: 20px; }
+    }
+
+    .dialogue-choice-btn {
+      background: rgba(30, 26, 22, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      padding: 9px 14px;
+      border-radius: 10px;
+      color: #e6dac6;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.25s;
+      margin-bottom: 8px;
+    }
+
+    .dialogue-choice-btn:hover {
+      background: rgba(65, 48, 25, 0.95);
+      border-color: var(--gold-primary);
+      color: #fff;
+      transform: translateX(6px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+
+    /* ============================================================
+       ACT 4: 3D DRAGON FLIGHT SIMULATOR (GUARANTEED ACTIVE RENDER)
+       ============================================================ */
+    #page-dragon {
+      background: radial-gradient(circle at center, #1b0f0b 0%, #060507 90%);
+      position: relative;
+    }
+
+    .dragon-cockpit-box {
+      position: relative;
+      width: 100%;
+      max-width: 950px;
+      height: 480px;
+      border: 2px solid #ff4500;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 15px 50px rgba(255, 69, 0, 0.35), inset 0 0 60px rgba(0,0,0,0.9);
+      background: #080608;
+    }
+
+    #dragon-three-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+
+    .dragon-hud-overlay {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(14, 10, 10, 0.88);
+      border: 1px solid #ff4500;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      color: #ffaa78;
+      letter-spacing: 2px;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .dragon-controls-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 16px;
+      z-index: 30;
+    }
+
+    .btn-dracarys-fire {
+      background: linear-gradient(135deg, #ff4500 0%, #b22222 100%);
+      border: 2px solid #fff;
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 30px;
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      cursor: pointer;
+      box-shadow: 0 0 30px #ff4500;
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .btn-dracarys-fire:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 50px #ff0000;
+    }
+
+    #dragon-flame-burst {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 500;
+      opacity: 0;
+      background: radial-gradient(circle, rgba(255, 69, 0, 0.95) 0%, rgba(139, 0, 0, 0.95) 60%, #000 100%);
+      transition: opacity 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    /* ============================================================
+       ACT 5: THE CROSSBOW TRIAL MINI-GAME
+       ============================================================ */
+    #page-crossbow {
+      background: radial-gradient(circle at center, #151318 0%, #070709 90%);
+    }
+
+    .crossbow-stage-card {
+      width: 100%;
+      max-width: 900px;
+      background: #0f0e11;
+      border: 2px solid rgba(212, 175, 55, 0.5);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-epic);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .crossbow-scoreboard {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: rgba(24, 20, 26, 0.95);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+      font-family: 'Cinzel', serif;
+    }
+
+    .crossbow-canvas-wrap {
+      position: relative;
+      width: 100%;
+      height: 420px;
+      background: #09090c;
+      cursor: crosshair;
+      overflow: hidden;
+    }
+
+    #crossbow-play-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .crossbow-splash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 10, 14, 0.88);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      z-index: 20;
+    }
+
+    /* ============================================================
+       ACT 6: 3D IRON THRONE & CANDLE BLOW CORONATION
+       ============================================================ */
+    #page-coronation {
+      background: radial-gradient(circle at center, #1a1510 0%, #060507 90%);
+    }
+
+    .coronation-arena {
+      width: 100%;
+      max-width: 950px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .throne-3d-viewport {
+      width: 100%;
+      height: 380px;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      background: #09090c;
+      box-shadow: 0 15px 45px rgba(0,0,0,0.9), inset 0 0 50px rgba(0,0,0,0.8);
+    }
+
+    #throne-3d-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .cake-ceremony-dock {
+      width: 100%;
+      max-width: 700px;
+      background: rgba(20, 17, 15, 0.95);
+      border: 2px solid var(--gold-primary);
+      border-radius: 20px;
+      padding: 24px 20px;
+      box-shadow: var(--shadow-epic);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .candle-sticks-row {
+      display: flex;
+      gap: 24px;
+      margin-bottom: -6px;
+      z-index: 5;
+    }
+
+    .cake-candle {
+      position: relative;
+      width: 14px;
+      height: 48px;
+      background: linear-gradient(180deg, #ffd778 0%, #876211 100%);
+      border-radius: 3px 3px 0 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+    }
+
+    .candle-wick-fire {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 24px;
+      background: radial-gradient(circle at 50% 80%, #ffffff 0%, #ffeb3b 30%, #ff5722 75%, transparent 100%);
+      border-radius: 50% 50% 20% 20%;
+      filter: drop-shadow(0 0 10px #ff9800);
+      animation: flickerFlame 0.15s infinite alternate;
+      cursor: pointer;
+      transition: all 0.4s;
+    }
+
+    .candle-wick-fire.extinguished {
+      opacity: 0 !important;
+      transform: translateX(-50%) translateY(-10px) scale(0.2) !important;
+    }
+
+    .cake-platter {
+      width: 240px;
+      height: 80px;
+      background: linear-gradient(180deg, #362211 0%, #1e1208 100%);
+      border: 2px solid var(--gold-primary);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .cake-platter::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      width: 260px;
+      height: 20px;
+      background: #4d3319;
+      border: 1px solid var(--gold-light);
+      border-radius: 8px;
+    }
+
+    /* ============================================================
+       ACT 7: VALYRIAN BIRTHDAY PROCLAMATION & PNG EXPORTER
+       ============================================================ */
+    #page-decree {
+      background: radial-gradient(circle at center, #181410 0%, #070709 85%);
+    }
+
+    .ancient-scroll-paper {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      background: #e8dcc4;
+      color: #2b2016;
+      border: 6px solid #453018;
+      border-radius: 8px;
+      padding: 35px 30px;
+      box-shadow: var(--shadow-epic), inset 0 0 60px rgba(110, 78, 43, 0.35);
+      text-align: left;
+    }
+
+    .scroll-royal-header {
+      text-align: center;
+      border-bottom: 2px solid #8b6508;
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+
+    .scroll-body-text {
+      font-family: 'MedievalSharp', cursive;
+      font-size: clamp(0.95rem, 1.9vw, 1.15rem);
+      line-height: 1.8;
+      color: #24160c;
+      margin-bottom: 22px;
+    }
+
+    .scroll-sig-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+      gap: 10px;
+      border-top: 1px dashed #8b6508;
+      padding-top: 16px;
+      text-align: center;
+    }
+
+    .scroll-sig-item .name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #4a2d13;
+    }
+    .scroll-sig-item .house {
+      font-size: 0.62rem;
+      color: #7d5e3c;
+      font-style: italic;
+    }
+
+    /* Export Decree Button */
+    .decree-action-row {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 25px;
+      flex-wrap: wrap;
+    }
+
+    .btn-export-png {
+      background: linear-gradient(135deg, #ffd778 0%, #d4af37 50%, #8b6508 100%);
+      color: #0b0907;
+      border: 2px solid #fff;
+      padding: 12px 28px;
+      border-radius: 30px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.9rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(245, 197, 66, 0.6);
+      transition: all 0.3s;
+    }
+    .btn-export-png:hover {
+      transform: scale(1.06);
+      box-shadow: 0 6px 25px rgba(245, 197, 66, 0.9);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Ash & Fire Canvas -->
+  <canvas id="ambient-fire-canvas"></canvas>
+  <div class="vignette-overlay"></div>
+
+  <!-- Dracarys Screen Blast Fire Effect -->
+  <div id="dragon-flame-burst">
+    <div style="font-family:'Cinzel Decorative'; font-size:clamp(3rem, 9vw, 6.5rem); color:#fff4c7; text-shadow:0 0 50px #ff4500, 0 0 90px #ff0000;">
+      DRACARYS!
+    </div>
+    <div style="font-family:'Cinzel'; font-size:1.3rem; color:#ffd778; letter-spacing:4px; margin-top:14px;">
+      THE DRAGONS OF WESTEROS TOAST KING AADESH!
+    </div>
+  </div>
+
+  <!-- ============================================================
+       TOP ROYAL HUD & JUKEBOX
+       ============================================================ -->
+  <header class="top-royal-hud">
+    <div class="brand-group" onclick="navigateToChapter(0)">
+      <div class="brand-sigil">
+        <i class="fa-solid fa-dragon"></i>
+      </div>
+      <div>
+        <h1 class="cinzel-dec" style="font-size:0.95rem; color:var(--gold-light);">THE SEVEN KINGDOMS</h1>
+        <p style="font-size:0.65rem; color:var(--text-muted); letter-spacing:1px;">ROYAL NAMEDAY CHRONICLE</p>
+      </div>
+    </div>
+
+    <div class="chapter-indicator" id="hud-chapter-label">
+      <i class="fa-solid fa-scroll"></i>
+      <span id="current-chapter-title">ACT I: THE BLOOD SEAL</span>
+    </div>
+
+    <div class="audio-controls-wrap">
+      <select class="track-select-box" id="jukebox-select" onchange="changeTrack(this.value)">
+        <option value="got">Theme: Game of Thrones</option>
+        <option value="castamere">Theme: Rains of Castamere</option>
+        <option value="light">Theme: Light of the Seven</option>
+      </select>
+      <button class="btn-audio-toggle" onclick="toggleMainMusic()" title="Play / Mute Music">
+        <i class="fa-solid fa-volume-high" id="music-hud-icon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       STORY VIEWPORT: 7 SEPARATE CHAPTER PAGES
+       ============================================================ -->
+  <main class="story-viewport">
+
+    <!-- PAGE 0: THE BLOOD SEAL & HERO PAGE -->
+    <section class="story-page active-page" id="page-seal">
+      <canvas id="hero-three-canvas"></canvas>
+
+      <div class="page-header" style="position:relative; z-index:10;">
+        <div class="page-subtitle">By Imperial Decree of the Iron Throne</div>
+        <h2 class="page-title cinzel-dec">HAIL TO THE KING</h2>
+        
+        <div class="king-name-tag">
+          <i class="fa-solid fa-crown" style="color:var(--gold-primary);"></i>
+          <input type="text" id="sovereign-name-input" class="king-name-input" value="KING AADESH" title="Click to rename Birthday King" />
+          <i class="fa-solid fa-pen-nib" style="cursor:pointer;" onclick="document.getElementById('sovereign-name-input').focus();"></i>
+        </div>
+
+        <p class="page-desc">
+          “To the sovereign whose name shall echo throughout the Seven Kingdoms... Break the ancient blood seal to awaken the realm and claim your birthright.”
+        </p>
+      </div>
+
+      <div class="seal-interact-box" id="wax-seal-component" onclick="breakRoyalSealAction()">
+        <div class="wax-seal-button">
+          <i class="fa-solid fa-dragon"></i>
+          <span>BREAK SEAL</span>
+        </div>
+        <div style="margin-top:14px; font-size:0.9rem; color:var(--gold-light); letter-spacing:1px;">
+          <i class="fa-solid fa-hand-pointer"></i> Touch to Shatter the Wax Seal & Begin the Chronicle
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 1: THE LIVING WAR MAP OF WESTEROS -->
+    <section class="story-page" id="page-map">
+      <div class="page-header">
+        <div class="page-subtitle">Authentic Cartography of the Realm</div>
+        <h2 class="page-title">THE WAR & NAMEDAY MAP</h2>
+        <p class="page-desc">
+          The Great Houses have raised their banners for King Aadesh. Tap upon any kingdom fortress to review their royal tributes.
+        </p>
+      </div>
+
+      <div class="map-frame-box">
+        <img src="assets/westeros_map.jpg" alt="Official Game of Thrones Westeros Map" class="map-artwork" onerror="this.src='https://wallpapercave.com/wp/wp1818247.jpg';" />
+
+        <!-- Hotspots -->
+        <div class="map-hotspot" id="spot-winterfell" onclick="revealMapDrawer('winterfell')">
+          <div class="hotspot-icon"><i class="fa-solid fa-shield-dog"></i></div>
+          <div class="hotspot-text">WINTERFELL • Jon & Sansa</div>
+        </div>
+
+        <div class="map-hotspot" id="spot-thewall" onclick="revealMapDrawer('thewall')">
+          <div class="hotspot-icon"><i class="fa-solid fa-snowflake"></i></div>
+          <div class="hotspot-text">THE WALL • Castle Black</div>
+        </div>
+
+        <div class="map-hotspot" id="spot-dragonstone" onclick="revealMapDrawer('dragonstone')">
+          <div class="hotspot-icon" style="border-color:#ff4500; color:#ff4500;"><i class="fa-solid fa-dragon"></i></div>
+          <div class="hotspot-text">DRAGONSTONE • Daenerys</div>
+        </div>
+
+        <div class="map-hotspot" id="spot-kingslanding" onclick="revealMapDrawer('kingslanding')">
+          <div class="hotspot-icon"><i class="fa-solid fa-crown"></i></div>
+          <div class="hotspot-text">KING'S LANDING • Red Keep</div>
+        </div>
+
+        <div class="map-hotspot" id="spot-casterly" onclick="revealMapDrawer('casterly')">
+          <div class="hotspot-icon" style="border-color:#f1c40f; color:#f1c40f;"><i class="fa-solid fa-shield-halved"></i></div>
+          <div class="hotspot-text">CASTERLY ROCK • Jaime & Tyrion</div>
+        </div>
+
+        <div class="map-hotspot" id="spot-highgarden" onclick="revealMapDrawer('highgarden')">
+          <div class="hotspot-icon" style="border-color:#2ecc71; color:#2ecc71;"><i class="fa-solid fa-spa"></i></div>
+          <div class="hotspot-text">HIGHGARDEN • Margaery</div>
+        </div>
+
+        <div class="map-hotspot" id="spot-asshai" onclick="revealMapDrawer('asshai')">
+          <div class="hotspot-icon" style="border-color:#e74c3c; color:#e74c3c;"><i class="fa-solid fa-fire-flame-curved"></i></div>
+          <div class="hotspot-text">RED TEMPLE • Melisandre</div>
+        </div>
+
+        <div class="map-flyout" id="map-realm-drawer">
+          <img src="assets/daenerys.jpg" id="flyout-img" class="flyout-avatar" alt="Character" onerror="this.src='assets/daenerys_dragon_queen_1792833165784.jpg';" />
+          <div style="flex:1;">
+            <h4 id="flyout-title" style="color:var(--gold-light); font-size:1.05rem; margin-bottom:4px;">Dragonstone</h4>
+            <p id="flyout-desc" style="font-size:0.82rem; color:var(--text-parchment); line-height:1.4; margin-bottom:10px;">
+              Daenerys Targaryen summons King Aadesh to the dragon lair for royal celebration.
+            </p>
+            <div style="display:flex; gap:10px;">
+              <button class="btn-page-nav" style="padding:6px 16px; font-size:0.75rem;" onclick="navigateToChapter(2)">
+                <i class="fa-solid fa-comments"></i> Enter Audience
+              </button>
+              <button class="btn-page-nav" style="padding:6px 14px; font-size:0.75rem; background:transparent;" onclick="hideMapDrawer()">
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 2: PHYSICAL ROYAL AUDIENCE (9 DISTINCT VOICES) -->
+    <section class="story-page" id="page-characters">
+      <div class="page-header">
+        <div class="page-subtitle">Personal Audiences with the Great Characters</div>
+        <h2 class="page-title">THE ROYAL GUEST CHAMBERS</h2>
+        <p class="page-desc">
+          Click any portrait below to converse with them. Press <strong style="color:var(--gold-light);">“HEAR ROYAL VOICE”</strong> to hear their distinct voice!
+        </p>
+      </div>
+
+      <div class="char-carousel-deck">
+        <!-- 9 Characters Selection Bar -->
+        <div class="char-avatar-bar">
+          <button class="avatar-btn selected" onclick="selectCharacter('daenerys')">
+            <img src="assets/daenerys.jpg" alt="Daenerys" onerror="this.src='assets/daenerys_dragon_queen_1792833165784.jpg';" />
+            Daenerys
+          </button>
+          <button class="avatar-btn" onclick="selectCharacter('melisandre')">
+            <img src="assets/melisandre.jpg" alt="Melisandre" onerror="this.src='assets/red_priestess_fire_1792833219432.jpg';" />
+            Melisandre
+          </button>
+          <button class="avatar-btn" onclick="selectCharacter('margaery')">
+            <img src="assets/margaery.jpg" alt="Margaery" onerror="this.src='assets/rose_queen_highgarden_1792833255462.jpg';" />
+            Margaery
+          </button>
+          <button class="avatar-btn" onclick="selectCharacter('cersei')">
+            <img src="assets/cersei.jpg" alt="Cersei" onerror="this.src='https://upload.wikimedia.org/wikipedia/en/9/94/Cersei_Lannister-Lena_Headey.jpg';" />
+            Cersei
+          </button>
+          <button class="avatar-btn" onclick="selectCharacter('sansa')">
+            <img src="assets/sansa.jpg" alt="Sansa" onerror="this.src='https://upload.wikimedia.org/wikipedia/en/7/74/SophieTurnerAsSansaStark.jpg';" />
+            Sansa
+          </button>
+          <button class="avatar-btn" onclick="selectCharacter('jaime')">
+            <img src="assets/jaime.jpg" alt="Jaime" onerror="this.src='https://upload.wikimedia.org/wikipedia/en/b/b4/Jaime_Lannister-Nikolaj_Coster-Waldau.jpg';" />
+            Jaime
+          </button>
+          <button class="avatar-btn" onclick="selectCharacter('tyrion')">
+            <img src="assets/tyrion.jpg" alt="Tyrion" onerror="this.src='https://upload.wikimedia.org/wikipedia/en/5/50/Tyrion_Lannister-Peter_Dinklage.jpg';" />
+            Tyrion
+          </button>
+          <button class="avatar-btn" onclick="selectCharacter('jon')">
+            <img src="assets/jon_snow.jpg" alt="Jon" onerror="this.src='https://upload.wikimedia.org/wikipedia/en/3/30/Jon_Snow_Season_8.png';" />
+            Jon Snow
+          </button>
+          <button class="avatar-btn" onclick="selectCharacter('arya')">
+            <img src="assets/arya.jpg" alt="Arya" onerror="this.src='https://upload.wikimedia.org/wikipedia/en/3/39/Arya_Stark-Maisie_Williams.jpg';" />
+            Arya
+          </button>
+        </div>
+
+        <div class="char-card-stage" id="master-char-card">
+          <div class="char-image-pane">
+            <div class="char-badge-flair" id="flair-badge">MOTHER OF DRAGONS</div>
+            <img src="assets/daenerys.jpg" id="active-char-portrait" class="char-portrait-img" alt="Character" onerror="this.src='assets/daenerys_dragon_queen_1792833165784.jpg';" />
+          </div>
+
+          <div class="char-interact-pane">
+            <div style="font-family:'Cinzel'; font-size:0.75rem; color:var(--gold-primary); letter-spacing:3px; margin-bottom:4px;" id="active-char-house">HOUSE TARGARYEN • DRAGONSTONE</div>
+            <h3 style="font-size:clamp(1.5rem, 3vw, 2.2rem); font-weight:900; color:#fff; margin-bottom:2px;" id="active-char-name">DAENERYS TARGARYEN</h3>
+            <div style="font-size:0.82rem; color:var(--text-muted); font-style:italic; margin-bottom:14px;" id="active-char-sub">Breaker of Chains, Queen of the Andals, First of Her Name</div>
+
+            <div class="char-speech-bubble">
+              <p class="char-speech-text" id="active-char-dialogue">
+                “My Lord King <span class="king-mention sovereign-inject">King Aadesh</span>... The Iron Throne was forged for men of fire. Tonight my dragons bend their wings only to your honor. Tell me, do you dare ride into the midnight sky with me, or shall I tame you myself?”
+              </p>
+            </div>
+
+            <div class="voice-control-row">
+              <button class="btn-voice-speak" id="btn-char-speak" onclick="triggerCharacterVoice()">
+                <i class="fa-solid fa-volume-high"></i> HEAR ROYAL VOICE
+              </button>
+              <div class="speaking-wave-bars" id="voice-waves">
+                <div class="s-bar"></div>
+                <div class="s-bar"></div>
+                <div class="s-bar"></div>
+                <div class="s-bar"></div>
+              </div>
+            </div>
+
+            <div id="active-char-choices"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 3: 3D DRAGON FLIGHT SIMULATOR -->
+    <section class="story-page" id="page-dragon">
+      <div class="page-header">
+        <div class="page-subtitle">Sovereign Air Superiority</div>
+        <h2 class="page-title">THE FLIGHT OF DROGON</h2>
+        <p class="page-desc">
+          Take command of Drogon across the skies. Drag with your mouse or finger to steer, and unleash <strong>DRACARYS</strong> fire breath!
+        </p>
+      </div>
+
+      <div class="dragon-cockpit-box">
+        <div class="dragon-hud-overlay">
+          <i class="fa-solid fa-dragon"></i> DRAGON RIDER: <span class="sovereign-inject">KING AADESH</span>
+        </div>
+        <canvas id="dragon-three-canvas"></canvas>
+
+        <div class="dragon-controls-bar">
+          <button class="btn-dracarys-fire" onclick="unleashDracarys()">
+            <i class="fa-solid fa-fire"></i> DRACARYS!
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 4: THE CROSSBOW TRIAL MINI-GAME -->
+    <section class="story-page" id="page-crossbow">
+      <div class="page-header">
+        <div class="page-subtitle">Trial of Precision & Reflexes</div>
+        <h2 class="page-title">THE ROYAL CROSSBOW HUNT</h2>
+        <p class="page-desc">
+          Shoot invading White Walkers and claim flagons of birthday ale! Aim with your finger or mouse cursor.
+        </p>
+      </div>
+
+      <div class="crossbow-stage-card">
+        <div class="crossbow-scoreboard">
+          <div><i class="fa-solid fa-bullseye" style="color:var(--gold-primary);"></i> Score: <span id="cb-score-val" style="color:#fff; font-weight:900;">0</span></div>
+          <div><i class="fa-solid fa-stopwatch" style="color:#ff4d4d;"></i> Time: <span id="cb-time-val" style="color:#fff; font-weight:900;">30s</span></div>
+          <div><i class="fa-solid fa-medal" style="color:#ffd778;"></i> Rank: <span id="cb-rank-val" style="color:#ffd778;">Marksman</span></div>
+        </div>
+
+        <div class="crossbow-canvas-wrap">
+          <canvas id="crossbow-play-canvas"></canvas>
+
+          <div class="crossbow-splash" id="crossbow-start-screen">
+            <i class="fa-solid fa-crosshairs" style="font-size:3.5rem; color:var(--gold-primary); margin-bottom:12px;"></i>
+            <h3 style="font-size:1.8rem; color:var(--gold-light); margin-bottom:8px;" id="cb-splash-title">READY YOUR BOLTS, KING AADESH</h3>
+            <p style="font-size:0.9rem; color:var(--text-parchment); max-width:480px; margin-bottom:20px;" id="cb-splash-desc">
+              Tap or click moving targets. Hit White Walkers (+150 pts), Golden Flagons (+200 pts), and Dragon Emblems (+300 pts).
+            </p>
+            <button class="btn-page-nav" style="font-size:1rem; padding:12px 32px;" onclick="beginCrossbowHunt()">
+              <i class="fa-solid fa-play"></i> START TRIAL
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 5: 3D IRON THRONE & CANDLE BLOW CORONATION -->
+    <section class="story-page" id="page-coronation">
+      <div class="page-header">
+        <div class="page-subtitle">The Great Hall of the Red Keep</div>
+        <h2 class="page-title">THE IRON THRONE & FEAST</h2>
+        <p class="page-desc">
+          Ascend the Iron Throne forged from a thousand swords. Blow out the dragon candles to seal King Aadesh's birthday wish!
+        </p>
+      </div>
+
+      <div class="coronation-arena">
+        <div class="throne-3d-viewport">
+          <div style="position:absolute; top:12px; left:50%; transform:translateX(-50%); background:rgba(14,12,16,0.85); border:1px solid var(--gold-primary); padding:4px 16px; border-radius:20px; font-family:'Cinzel'; font-size:0.72rem; color:var(--gold-light); pointer-events:none; z-index:10;">
+            <i class="fa-solid fa-arrows-spin"></i> DRAG / SWIPE TO ROTATE THE IRON THRONE (3D)
+          </div>
+          <canvas id="throne-3d-canvas"></canvas>
+        </div>
+
+        <div class="cake-ceremony-dock">
+          <h3 style="font-size:1.3rem; color:var(--gold-light); margin-bottom:10px;">
+            BLOW THE VALYRIAN DRAGON CANDLES
+          </h3>
+
+          <div style="display:flex; flex-direction:column; align-items:center; margin:15px 0 20px;">
+            <div class="candle-sticks-row">
+              <div class="cake-candle"><div class="candle-wick-fire" id="wick-1" onclick="quenchCandle(1)"></div></div>
+              <div class="cake-candle" style="height:56px;"><div class="candle-wick-fire" id="wick-2" onclick="quenchCandle(2)"></div></div>
+              <div class="cake-candle"><div class="candle-wick-fire" id="wick-3" onclick="quenchCandle(3)"></div></div>
+            </div>
+            <div class="cake-platter">
+              <i class="fa-solid fa-crown" style="font-size:2.2rem; color:var(--gold-light); filter:drop-shadow(0 0 10px rgba(245,197,66,0.6));"></i>
+            </div>
+          </div>
+
+          <button class="btn-page-nav" id="btn-blow-all" style="font-size:0.95rem; padding:12px 30px;" onclick="quenchAllCandles()">
+            <i class="fa-solid fa-wind"></i> BLOW OUT ALL CANDLES
+          </button>
+
+          <div id="coronation-post-announcement" style="display:none; margin-top:15px; animation:fadeInScale 0.6s forwards;">
+            <div style="font-size:1.8rem; color:var(--gold-light); font-family:'Cinzel Decorative';">
+              LONG MAY HE REIGN!
+            </div>
+            <p style="font-size:0.95rem; color:#f0e3cc; margin-top:6px;">
+              The wish is whispered to the Old Gods and the New! King Aadesh is crowned Sovereign of the Realm!
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 6: VALYRIAN BIRTHDAY PROCLAMATION & PNG EXPORTER -->
+    <section class="story-page" id="page-decree">
+      <div class="page-header">
+        <div class="page-subtitle">Recorded in the Citadel for Eternity</div>
+        <h2 class="page-title">THE ROYAL NAMEDAY DECREE</h2>
+        <p class="page-desc">
+          Official Imperial Proclamation signed by the Great Houses of Westeros.
+        </p>
+      </div>
+
+      <div class="ancient-scroll-paper" id="royal-decree-scroll">
+        <div class="scroll-royal-header">
+          <i class="fa-solid fa-crown" style="font-size:2.4rem; color:#8b6508; margin-bottom:6px;"></i>
+          <h3 style="font-family:'Cinzel Decorative'; font-size:1.6rem; color:#38220c;">ROYAL PROCLAMATION</h3>
+          <div style="font-family:'Cinzel'; font-size:0.75rem; color:#6e4e2b; letter-spacing:3px;">
+            TO ALL LORDS, LADIES & FREE FOLK OF THE SEVEN KINGDOMS
+          </div>
+        </div>
+
+        <div class="scroll-body-text">
+          “Be it known from the frozen battlements of the Wall to the golden gardens of Highgarden:
+          <br><br>
+          On this day, the Seven Kingdoms unite to honor our true Sovereign, <strong class="sovereign-inject" style="color:#8b0000; font-family:'Cinzel'; font-size:1.25rem;">KING AADESH</strong>!
+          <br><br>
+          May your blade forever drink the blood of your foes, your dragons rise untamed to the skies, your flagons brim with Dornish summer red, and your nights be filled with laughter, loyalty, and passion. Even if the longest winter blankets the realm, your flame shall never die!
+          <br><br>
+          HAPPY BIRTHDAY, YOUR GRACE!”
+        </div>
+
+        <div class="scroll-sig-row">
+          <div class="scroll-sig-item"><div class="name">Daenerys Targaryen</div><div class="house">Mother of Dragons</div></div>
+          <div class="scroll-sig-item"><div class="name">Melisandre</div><div class="house">Priestess of R'hllor</div></div>
+          <div class="scroll-sig-item"><div class="name">Margaery Tyrell</div><div class="house">The Golden Rose</div></div>
+          <div class="scroll-sig-item"><div class="name">Cersei Lannister</div><div class="house">Queen of the Rock</div></div>
+          <div class="scroll-sig-item"><div class="name">Ser Jaime Lannister</div><div class="house">The Kingsguard</div></div>
+          <div class="scroll-sig-item"><div class="name">Jon Snow</div><div class="house">King in the North</div></div>
+          <div class="scroll-sig-item"><div class="name">Tyrion Lannister</div><div class="house">Hand of the King</div></div>
+          <div class="scroll-sig-item"><div class="name">Arya Stark</div><div class="house">No One</div></div>
+        </div>
+      </div>
+
+      <!-- Action Row: Download Shareable Image + Loot -->
+      <div class="decree-action-row">
+        <button class="btn-export-png" onclick="exportRoyalCertificatePNG()">
+          <i class="fa-solid fa-download"></i> DOWNLOAD ROYAL DECREE (PNG)
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       BOTTOM NAVIGATION DOCK
+       ============================================================ -->
+  <footer class="bottom-nav-dock">
+    <button class="btn-page-nav" id="btn-prev-page" onclick="stepChapter(-1)">
+      <i class="fa-solid fa-chevron-left"></i> PREV ACT
+    </button>
+
+    <div class="chapter-dots">
+      <div class="chapter-dot active" data-title="Act I: The Blood Seal" onclick="navigateToChapter(0)"></div>
+      <div class="chapter-dot" data-title="Act II: War Map" onclick="navigateToChapter(1)"></div>
+      <div class="chapter-dot" data-title="Act III: Royal Audience" onclick="navigateToChapter(2)"></div>
+      <div class="chapter-dot" data-title="Act IV: Dragon Flight" onclick="navigateToChapter(3)"></div>
+      <div class="chapter-dot" data-title="Act V: Crossbow Hunt" onclick="navigateToChapter(4)"></div>
+      <div class="chapter-dot" data-title="Act VI: Iron Throne Feast" onclick="navigateToChapter(5)"></div>
+      <div class="chapter-dot" data-title="Act VII: Royal Decree" onclick="navigateToChapter(6)"></div>
+    </div>
+
+    <button class="btn-page-nav" id="btn-next-page" onclick="stepChapter(1)">
+      NEXT ACT <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT AUDIO, THREE.JS 3D, MULTI-SPEECH ENGINE
+       ============================================================ */
+  -->
+  <script>
+    /* ============================================================
+       1. ROYAL CITADEL AUDIO JUKEBOX (SYNTHESIZED GOT SOUNDTRACKS)
+       ============================================================ */
+    class WesterosJukebox {
+      constructor() {
+        this.ctx = null;
+        this.isPlaying = false;
+        this.currentTrack = 'got';
+        this.timer = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+      }
+
+      playSfx(type) {
+        this.init();
+        const now = this.ctx.currentTime;
+
+        if (type === 'sealBreak') {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(80, now + 0.3);
+          gain.gain.setValueAtTime(0.5, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else if (type === 'sword') {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, now);
+          osc.frequency.exponentialRampToValueAtTime(1760, now + 0.15);
+          osc.frequency.exponentialRampToValueAtTime(440, now + 0.45);
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.45);
+        } else if (type === 'crossbow') {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(120, now);
+          osc.frequency.exponentialRampToValueAtTime(450, now + 0.08);
+          osc.frequency.exponentialRampToValueAtTime(60, now + 0.22);
+          gain.gain.setValueAtTime(0.5, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.22);
+        } else if (type === 'hit') {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(380, now);
+          osc.frequency.exponentialRampToValueAtTime(110, now + 0.15);
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } else if (type === 'dracarys') {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(80, now);
+          osc.frequency.linearRampToValueAtTime(180, now + 0.4);
+          osc.frequency.exponentialRampToValueAtTime(30, now + 1.2);
+          gain.gain.setValueAtTime(0.7, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 1.2);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 1.2);
+        } else if (type === 'fanfare') {
+          const freqs = [261.63, 329.63, 392.00, 523.25];
+          freqs.forEach((f, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(f, now + idx * 0.08);
+            gain.gain.setValueAtTime(0.25, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + idx * 0.08);
+            osc.stop(now + 1.8);
+          });
+        }
+      }
+
+      startMusic(track) {
+        this.init();
+        this.currentTrack = track || this.currentTrack;
+        this.isPlaying = true;
+        document.getElementById('music-hud-icon').className = "fa-solid fa-volume-high";
+
+        const tracks = {
+          got: [
+            { f: 196.00, d: 0.7 }, { f: 130.81, d: 0.7 }, { f: 155.56, d: 0.35 }, { f: 174.61, d: 0.35 },
+            { f: 196.00, d: 0.7 }, { f: 130.81, d: 0.7 }, { f: 155.56, d: 0.35 }, { f: 174.61, d: 0.35 },
+            { f: 146.83, d: 1.2 }, { f: 174.61, d: 0.7 }, { f: 116.54, d: 0.7 }, { f: 155.56, d: 0.35 },
+            { f: 146.83, d: 0.35 }, { f: 174.61, d: 0.7 }, { f: 116.54, d: 0.7 }, { f: 146.83, d: 0.35 }, { f: 130.81, d: 1.2 }
+          ],
+          castamere: [
+            { f: 146.83, d: 0.8 }, { f: 164.81, d: 0.8 }, { f: 174.61, d: 0.8 }, { f: 164.81, d: 0.4 },
+            { f: 146.83, d: 0.8 }, { f: 130.81, d: 0.8 }, { f: 146.83, d: 1.4 }, { f: 174.61, d: 0.8 },
+            { f: 196.00, d: 0.8 }, { f: 220.00, d: 1.2 }, { f: 196.00, d: 0.8 }, { f: 174.61, d: 1.4 }
+          ],
+          light: [
+            { f: 261.63, d: 0.5 }, { f: 311.13, d: 0.5 }, { f: 392.00, d: 0.5 }, { f: 523.25, d: 0.8 },
+            { f: 466.16, d: 0.5 }, { f: 392.00, d: 0.5 }, { f: 311.13, d: 0.8 }, { f: 261.63, d: 1.4 }
+          ]
+        };
+
+        const notes = tracks[this.currentTrack] || tracks.got;
+        let idx = 0;
+
+        const loop = () => {
+          if (!this.isPlaying) return;
+          const n = notes[idx];
+          const now = this.ctx.currentTime;
+
+          const osc1 = this.ctx.createOscillator();
+          const osc2 = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc1.type = this.currentTrack === 'light' ? 'sine' : 'sawtooth';
+          osc2.type = 'triangle';
+          osc1.frequency.setValueAtTime(n.f, now);
+          osc2.frequency.setValueAtTime(n.f * 1.004, now);
+
+          gain.gain.setValueAtTime(0.01, now);
+          gain.gain.linearRampToValueAtTime(0.18, now + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + n.d);
+
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + n.d);
+          osc2.stop(now + n.d);
+
+          idx = (idx + 1) % notes.length;
+          this.timer = setTimeout(loop, n.d * 1000);
+        };
+        loop();
+      }
+
+      stopMusic() {
+        this.isPlaying = false;
+        if (this.timer) clearTimeout(this.timer);
+        document.getElementById('music-hud-icon').className = "fa-solid fa-volume-xmark";
+      }
+    }
+
+    const jukebox = new WesterosJukebox();
+
+    function toggleMainMusic() {
+      if (jukebox.isPlaying) jukebox.stopMusic();
+      else jukebox.startMusic();
+    }
+
+    function changeTrack(val) {
+      if (jukebox.isPlaying) {
+        jukebox.stopMusic();
+        jukebox.startMusic(val);
+      } else {
+        jukebox.currentTrack = val;
+      }
+    }
+
+    /* ============================================================
+       2. MULTI-PAGE CHAPTER DECK
+       ============================================================ */
+    const pages = [
+      { id: 'page-seal', title: 'ACT I: THE BLOOD SEAL' },
+      { id: 'page-map', title: 'ACT II: THE WAR MAP' },
+      { id: 'page-characters', title: 'ACT III: ROYAL AUDIENCE' },
+      { id: 'page-dragon', title: 'ACT IV: DROGON FLIGHT' },
+      { id: 'page-crossbow', title: 'ACT V: CROSSBOW TRIAL' },
+      { id: 'page-coronation', title: 'ACT VI: IRON THRONE FEAST' },
+      { id: 'page-decree', title: 'ACT VII: ROYAL DECREE' }
+    ];
+
+    let currentChapterIndex = 0;
+
+    function navigateToChapter(index) {
+      if (index < 0 || index >= pages.length) return;
+      currentChapterIndex = index;
+      jukebox.playSfx('sword');
+
+      pages.forEach((p, i) => {
+        const el = document.getElementById(p.id);
+        el.classList.toggle('active-page', i === currentChapterIndex);
+      });
+
+      document.getElementById('current-chapter-title').textContent = pages[currentChapterIndex].title;
+      document.querySelectorAll('.chapter-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentChapterIndex);
+      });
+
+      document.getElementById('btn-prev-page').disabled = (currentChapterIndex === 0);
+      document.getElementById('btn-next-page').disabled = (currentChapterIndex === pages.length - 1);
+
+      if (currentChapterIndex === 3) startDragonFlightScene();
+      if (currentChapterIndex === 4) resizeCrossbow();
+      if (currentChapterIndex === 5) initThrone3D();
+    }
+
+    function stepChapter(delta) {
+      navigateToChapter(currentChapterIndex + delta);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') stepChapter(1);
+      if (e.key === 'ArrowLeft') stepChapter(-1);
+    });
+
+    /* ============================================================
+       3. SOVEREIGN NAME PERSONALIZATION
+       ============================================================ */
+    const nameBox = document.getElementById('sovereign-name-input');
+    nameBox.addEventListener('input', syncSovereignNames);
+
+    function syncSovereignNames() {
+      const val = nameBox.value.trim() || "KING AADESH";
+      document.querySelectorAll('.sovereign-inject').forEach(el => {
+        el.textContent = val;
+      });
+      if (charactersPool[selectedCharKey]) {
+        updateActiveDialogueText();
+      }
+    }
+
+    /* ============================================================
+       4. AMBIENT EMBER PARTICLES
+       ============================================================ */
+    const ambCanv = document.getElementById('ambient-fire-canvas');
+    const ambCtx = ambCanv.getContext('2d');
+    let emberParticles = [];
+
+    function setupAmbientCanvas() {
+      ambCanv.width = window.innerWidth;
+      ambCanv.height = window.innerHeight;
+    }
+    window.addEventListener('resize', setupAmbientCanvas);
+    setupAmbientCanvas();
+
+    for (let i = 0; i < 45; i++) {
+      emberParticles.push({
+        x: Math.random() * ambCanv.width,
+        y: Math.random() * ambCanv.height,
+        r: Math.random() * 2.2 + 0.8,
+        speedY: Math.random() * 1.2 + 0.4,
+        speedX: (Math.random() - 0.5) * 0.8,
+        color: Math.random() > 0.35 ? '#ff4500' : '#ffd700',
+        alpha: Math.random() * 0.8 + 0.2
+      });
+    }
+
+    function loopEmbers() {
+      ambCtx.clearRect(0, 0, ambCanv.width, ambCanv.height);
+      emberParticles.forEach(p => {
+        p.y -= p.speedY;
+        p.x += p.speedX;
+        if (p.y < 0) {
+          p.y = ambCanv.height + 10;
+          p.x = Math.random() * ambCanv.width;
+        }
+        ambCtx.beginPath();
+        ambCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ambCtx.fillStyle = p.color;
+        ambCtx.globalAlpha = p.alpha;
+        ambCtx.shadowBlur = 8;
+        ambCtx.shadowColor = '#ff4500';
+        ambCtx.fill();
+      });
+      ambCtx.globalAlpha = 1;
+      requestAnimationFrame(loopEmbers);
+    }
+    loopEmbers();
+
+    /* ============================================================
+       5. ACT 1: BREAK THE WAX SEAL
+       ============================================================ */
+    function breakRoyalSealAction() {
+      jukebox.init();
+      jukebox.playSfx('sealBreak');
+      jukebox.playSfx('fanfare');
+      if (!jukebox.isPlaying) jukebox.startMusic('got');
+
+      const comp = document.getElementById('wax-seal-component');
+      gsap.to(comp, {
+        scale: 1.25,
+        rotation: 12,
+        opacity: 0,
+        duration: 0.4,
+        onComplete: () => {
+          comp.innerHTML = `<div style="font-family:'Cinzel Decorative'; font-size:1.4rem; color:#ffd778;">THE ROYAL SEAL IS BROKEN!</div>`;
+          gsap.to(comp, { scale: 1, opacity: 1, duration: 0.3 });
+        }
+      });
+
+      confetti({
+        particleCount: 120,
+        spread: 90,
+        origin: { y: 0.65 },
+        colors: ['#ffd700', '#c41e3a', '#b8860b', '#ffffff']
+      });
+
+      setTimeout(() => { navigateToChapter(1); }, 1000);
+    }
+
+    function initHero3D() {
+      const canvas = document.getElementById('hero-three-canvas');
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      const goldLight = new THREE.PointLight(0xffd700, 2, 50);
+      goldLight.position.set(0, 5, 8);
+      scene.add(goldLight);
+
+      const group = new THREE.Group();
+      const torusMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.25 });
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.1, 16, 100), torusMat);
+      group.add(ring);
+
+      for (let i = 0; i < 8; i++) {
+        const cone = new THREE.Mesh(new THREE.ConeGeometry(0.18, 2.6, 4), torusMat);
+        const a = (i / 8) * Math.PI * 2;
+        cone.position.set(Math.cos(a) * 2.8, Math.sin(a) * 2.8, 0);
+        cone.rotation.z = a - Math.PI / 2;
+        group.add(cone);
+      }
+
+      scene.add(group);
+      camera.position.z = 8.5;
+
+      function render() {
+        requestAnimationFrame(render);
+        group.rotation.z += 0.003;
+        group.rotation.y += 0.004;
+        renderer.render(scene, camera);
+      }
+      render();
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+    initHero3D();
+
+    /* ============================================================
+       6. ACT 2: WAR MAP DRAWER
+       ============================================================ */
+    const realmInfo = {
+      winterfell: {
+        title: "Winterfell: House Stark",
+        desc: "Jon Snow, Sansa, and Arya stand ready. The direwolves howl in salute of King Aadesh's nameday.",
+        img: "assets/jon_snow.jpg",
+        fallback: "https://upload.wikimedia.org/wikipedia/en/3/30/Jon_Snow_Season_8.png"
+      },
+      thewall: {
+        title: "Castle Black: The Night's Watch",
+        desc: "The black brothers pause their vigilance to drink from the frost horns in King Aadesh's honor.",
+        img: "assets/jon_snow.jpg",
+        fallback: "https://upload.wikimedia.org/wikipedia/en/3/30/Jon_Snow_Season_8.png"
+      },
+      dragonstone: {
+        title: "Dragonstone: House Targaryen",
+        desc: "Queen Daenerys has gathered three barrels of Dornish wine and Drogon stands primed for flight.",
+        img: "assets/daenerys.jpg",
+        fallback: "assets/daenerys_dragon_queen_1792833165784.jpg"
+      },
+      kingslanding: {
+        title: "King's Landing: The Red Keep",
+        desc: "Cersei, Tyrion, and Jaime Lannister prepare the banquet. A Lannister always honors a King's feast.",
+        img: "assets/cersei.jpg",
+        fallback: "https://upload.wikimedia.org/wikipedia/en/9/94/Cersei_Lannister-Lena_Headey.jpg"
+      },
+      casterly: {
+        title: "Casterly Rock: Golden Lions",
+        desc: "Ser Jaime and Tyrion Lannister draw golden blades to salute the Sovereign of the Realm.",
+        img: "assets/jaime.jpg",
+        fallback: "https://upload.wikimedia.org/wikipedia/en/b/b4/Jaime_Lannister-Nikolaj_Coster-Waldau.jpg"
+      },
+      highgarden: {
+        title: "Highgarden: House Tyrell",
+        desc: "Lady Margaery Tyrell welcomes King Aadesh with cascades of golden roses and vintage wines.",
+        img: "assets/margaery.jpg",
+        fallback: "assets/rose_queen_highgarden_1792833255462.jpg"
+      },
+      asshai: {
+        title: "Red Temple of R'hllor",
+        desc: "Melisandre tends the sacred flames to divine endless glory and conquests for King Aadesh.",
+        img: "assets/melisandre.jpg",
+        fallback: "assets/red_priestess_fire_1792833219432.jpg"
+      }
+    };
+
+    function revealMapDrawer(key) {
+      jukebox.playSfx('sword');
+      const data = realmInfo[key];
+      if (!data) return;
+
+      document.getElementById('flyout-title').textContent = data.title;
+      document.getElementById('flyout-desc').textContent = data.desc;
+      const img = document.getElementById('flyout-img');
+      img.src = data.img;
+      img.onerror = () => { img.src = data.fallback; };
+
+      document.getElementById('map-realm-drawer').classList.add('active');
+    }
+
+    function hideMapDrawer() {
+      document.getElementById('map-realm-drawer').classList.remove('active');
+    }
+
+    /* ============================================================
+       7. ACT 3: CHARACTERS (9 CHARACTERS & ACCURATE GENDER VOICES)
+       ============================================================ */
+    const charactersPool = {
+      daenerys: {
+        name: "DAENERYS TARGARYEN",
+        house: "HOUSE TARGARYEN • DRAGONSTONE",
+        title: "Breaker of Chains, Queen of the Andals, Mother of Dragons",
+        flair: "MOTHER OF DRAGONS",
+        img: "assets/daenerys.jpg",
+        fallback: "assets/daenerys_dragon_queen_1792833165784.jpg",
+        gender: "female",
+        speech: "My Lord King {NAME}... The Iron Throne was forged for men of fire. Tonight my dragons bend their wings only to your honor. Tell me, do you dare ride into the midnight sky with me, or shall I tame you myself?",
+        voiceOptions: { gender: 'female', pitch: 1.15, rate: 0.95 },
+        choices: [
+          { text: "“I will ride with you, Queen of Fire, into the heavens!”", reply: "Then hold tightly to my waist, my King. Westeros will burn with celebration tonight!" },
+          { text: "“Only if your dragons behave themselves at my feast.”", reply: "Drogon likes you... he only incinerates those who fail to empty their cups!" }
+        ]
+      },
+      melisandre: {
+        name: "MELISANDRE OF ASSHAI",
+        house: "THE RED PRIESTESS • TEMPLE OF R'HLLOR",
+        title: "Shadowbinder, Servant of the Lord of Light",
+        flair: "THE RED WOMAN",
+        img: "assets/melisandre.jpg",
+        fallback: "assets/red_priestess_fire_1792833219432.jpg",
+        gender: "female",
+        speech: "The night is dark and full of terrors, my King {NAME}... but in your eyes, I see a flame that cannot be quenched. Step into my chamber and let the sacred fire reveal your destiny.",
+        voiceOptions: { gender: 'female', pitch: 0.82, rate: 0.85 },
+        choices: [
+          { text: "“Read the sacred flames for me, Priestess.”", reply: "I see boundless power, golden fortunes, and an exquisite companion by your side this year!" },
+          { text: "“Your ruby shines brightly, Melisandre... as do you.”", reply: "Flattery from a true king burns sweeter than Asshai spices. Tonight, you reign supreme." }
+        ]
+      },
+      margaery: {
+        name: "MARGAERY TYRELL",
+        house: "HOUSE TYRELL • HIGHGARDEN",
+        title: "The Golden Rose of Highgarden, Queen of Westeros",
+        flair: "THE GOLDEN ROSE",
+        img: "assets/margaery.jpg",
+        fallback: "assets/rose_queen_highgarden_1792833255462.jpg",
+        gender: "female",
+        speech: "They call you fierce in battle, my Lord {NAME}... but I prefer a sovereign who knows how to savor the finer things. A toast of sweet Highgarden wine to the most handsome King in Westeros. Shall we sneak away from the feast?",
+        voiceOptions: { gender: 'female', pitch: 1.30, rate: 1.02 },
+        choices: [
+          { text: "“Lead the way, my Lady. The court can feast without us.”", reply: "A bold king after my own heart! The rose gardens are breathtaking under the moonlight." },
+          { text: "“First, let us drink this flagon dry in celebration!”", reply: "To your eternal youth, health, and undeniable charm, Your Grace!" }
+        ]
+      },
+      cersei: {
+        name: "CERSEI LANNISTER",
+        house: "HOUSE LANNISTER • CASTERLY ROCK",
+        title: "Queen of the Seven Kingdoms, Lady of Casterly Rock",
+        flair: "THE LIONESS",
+        img: "assets/cersei.jpg",
+        fallback: "https://upload.wikimedia.org/wikipedia/en/9/94/Cersei_Lannister-Lena_Headey.jpg",
+        gender: "female",
+        speech: "When you play the game of birthdays, you win and drink Arbor gold. I have had the court musicians executed for playing out of key... only the purest harmonies for King {NAME} today.",
+        voiceOptions: { gender: 'female', pitch: 0.98, rate: 0.90 },
+        choices: [
+          { text: "“A Lannister always repays their debts... where is my wine, Cersei?”", reply: "The finest vintage from the private cellars of Casterly Rock is already poured into your goblet." },
+          { text: "“Rule the kingdom with me tonight, Queen Cersei.”", reply: "Power is power, my King. And tonight, power belongs exclusively to you." }
+        ]
+      },
+      sansa: {
+        name: "SANSA STARK",
+        house: "HOUSE STARK • WINTERFELL",
+        title: "Lady of Winterfell, Queen in the North",
+        flair: "QUEEN IN THE NORTH",
+        img: "assets/sansa.jpg",
+        fallback: "https://upload.wikimedia.org/wikipedia/en/7/74/SophieTurnerAsSansaStark.jpg",
+        gender: "female",
+        speech: "The North remembers who stood by us in the bitter frost, King {NAME}. We have sewn you royal cloaks of direwolf fur to keep you warm across another glorious year.",
+        voiceOptions: { gender: 'female', pitch: 1.10, rate: 0.92 },
+        choices: [
+          { text: "“The North will always have my protection, Lady Sansa.”", reply: "And Winterfell will always welcome you home, Your Grace." }
+        ]
+      },
+      jaime: {
+        name: "SER JAIME LANNISTER",
+        house: "HOUSE LANNISTER • KINGSGUARD",
+        title: "The Kingslayer, Lord Commander of the Kingsguard, Golden Lion",
+        flair: "GOLDEN LION",
+        img: "assets/jaime.jpg",
+        fallback: "https://upload.wikimedia.org/wikipedia/en/b/b4/Jaime_Lannister-Nikolaj_Coster-Waldau.jpg",
+        gender: "male",
+        speech: "There are no men like you, King {NAME}... only you. When they sing of this day, let them remember that the Kingsguard bowed not out of fear, but out of supreme respect. Come, let us drink until even my golden hand feels warm!",
+        voiceOptions: { gender: 'male', pitch: 0.88, rate: 0.98 },
+        choices: [
+          { text: "“A toast to the Kingsguard, Ser Jaime!”", reply: "To honor, brotherhood, and a Sovereign who knows how to conquer!" },
+          { text: "“Will you spar with me after the feast?”", reply: "Only if you go easy on my left hand, Your Grace!" }
+        ]
+      },
+      tyrion: {
+        name: "TYRION LANNISTER",
+        house: "HOUSE LANNISTER • CASTERLY ROCK",
+        title: "Hand of the King, Lord of Casterly Rock",
+        flair: "HAND OF THE KING",
+        img: "assets/tyrion.jpg",
+        fallback: "https://upload.wikimedia.org/wikipedia/en/5/50/Tyrion_Lannister-Peter_Dinklage.jpg",
+        gender: "male",
+        speech: "I drink and I know things. And today, I know that you, {NAME}, are another year older, considerably wiser, and vastly more dangerous. A toast to the King who outdrinks the realm!",
+        voiceOptions: { gender: 'male', pitch: 1.05, rate: 1.08 },
+        choices: [
+          { text: "“Drink with me, Tyrion, until dawn breaks over the Red Keep!”", reply: "Now THAT is a royal command I shall execute with extreme diligence!" }
+        ]
+      },
+      jon: {
+        name: "JON SNOW",
+        house: "HOUSE STARK • WINTERFELL",
+        title: "The King in the North, 998th Lord Commander",
+        flair: "THE WHITE WOLF",
+        img: "assets/jon_snow.jpg",
+        fallback: "https://upload.wikimedia.org/wikipedia/en/3/30/Jon_Snow_Season_8.png",
+        gender: "male",
+        speech: "They say you know nothing of growing old, brother {NAME}... but tonight the North stands shoulder-to-shoulder with you. Take my blade Longclaw to guard your path.",
+        voiceOptions: { gender: 'male', pitch: 0.72, rate: 0.88 },
+        choices: [
+          { text: "“The North remembers its allies, Jon. Thank you, brother.”", reply: "Long live the King. The Starks will always answer your call." }
+        ]
+      },
+      arya: {
+        name: "ARYA STARK",
+        house: "HOUSE STARK • BRAAVOS",
+        title: "Hero of Winterfell, Assassin of the Night King",
+        flair: "NO ONE",
+        img: "assets/arya.jpg",
+        fallback: "https://upload.wikimedia.org/wikipedia/en/3/39/Arya_Stark-Maisie_Williams.jpg",
+        gender: "female",
+        speech: "A girl has no birthday... but the King certainly does! I took a name off my list tonight and replaced it with a birthday toast for you, {NAME}!",
+        voiceOptions: { gender: 'female', pitch: 1.25, rate: 1.12 },
+        choices: [
+          { text: "“Stick them with the pointy end, Arya!”", reply: "First lesson of the Faceless Men: Always make sure the birthday boy drinks first!" }
+        ]
+      }
+    };
+
+    let selectedCharKey = 'daenerys';
+
+    function selectCharacter(key) {
+      selectedCharKey = key;
+      jukebox.playSfx('sword');
+
+      document.querySelectorAll('.avatar-btn').forEach(b => {
+        b.classList.toggle('selected', b.getAttribute('onclick').includes(key));
+      });
+
+      const data = charactersPool[key];
+      if (!data) return;
+
+      document.getElementById('flair-badge').textContent = data.flair;
+      document.getElementById('active-char-house').textContent = data.house;
+      document.getElementById('active-char-name').textContent = data.name;
+      document.getElementById('active-char-sub').textContent = data.title;
+
+      const pImg = document.getElementById('active-char-portrait');
+      pImg.src = data.img;
+      pImg.onerror = () => { pImg.src = data.fallback; };
+
+      updateActiveDialogueText();
+
+      const choiceWrap = document.getElementById('active-char-choices');
+      choiceWrap.innerHTML = '';
+      data.choices.forEach(ch => {
+        const btn = document.createElement('button');
+        btn.className = 'dialogue-choice-btn';
+        btn.innerHTML = `<i class="fa-solid fa-comment-dots" style="color:var(--gold-primary);"></i> <span>${ch.text}</span>`;
+        btn.onclick = () => {
+          jukebox.playSfx('hit');
+          const name = nameBox.value.trim() || "King Aadesh";
+          document.getElementById('active-char-dialogue').innerHTML = `“${ch.reply.replace('{NAME}', name)}”`;
+          confetti({ particleCount: 30, spread: 50 });
+          speakCharacterLine(ch.reply.replace('{NAME}', name), data.voiceOptions);
+        };
+        choiceWrap.appendChild(btn);
+      });
+    }
+
+    function updateActiveDialogueText() {
+      const data = charactersPool[selectedCharKey];
+      const name = nameBox.value.trim() || "King Aadesh";
+      const formatted = data.speech.replace('{NAME}', `<span class="king-mention sovereign-inject">${name}</span>`);
+      document.getElementById('active-char-dialogue').innerHTML = formatted;
+    }
+
+    function triggerCharacterVoice() {
+      const data = charactersPool[selectedCharKey];
+      const name = nameBox.value.trim() || "King Aadesh";
+      const cleanText = data.speech.replace('{NAME}', name);
+      speakCharacterLine(cleanText, data.voiceOptions);
+    }
+
+    /* GENDER-ACCURATE ROBUST SPEECH SYNTHESIS ENGINE */
+    function speakCharacterLine(text, options) {
+      if (!('speechSynthesis' in window)) {
+        alert("Audio Voice: " + text);
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.pitch = options.pitch || 1.0;
+      utterance.rate = options.rate || 1.0;
+
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        let matchVoice = null;
+        const isMale = options.gender === 'male';
+
+        if (isMale) {
+          // Look for explicit male voices
+          matchVoice = voices.find(v => {
+            const n = v.name.toLowerCase();
+            return n.includes('david') || n.includes('mark') || n.includes('george') || n.includes('daniel') ||
+                   n.includes('male') || n.includes('guy') || n.includes('arthur') || n.includes('james');
+          });
+        } else {
+          // Look for explicit female voices
+          matchVoice = voices.find(v => {
+            const n = v.name.toLowerCase();
+            return n.includes('zira') || n.includes('samantha') || n.includes('female') || n.includes('hazel') ||
+                   n.includes('karen') || n.includes('victoria') || n.includes('susan') || n.includes('jenny');
+          });
+        }
+
+        // Fallback to language matching
+        if (!matchVoice) {
+          matchVoice = voices.find(v => v.lang.startsWith('en')) || voices[0];
+        }
+
+        if (matchVoice) utterance.voice = matchVoice;
+      }
+
+      const waves = document.getElementById('voice-waves');
+      waves.classList.add('active');
+
+      utterance.onend = () => { waves.classList.remove('active'); };
+      utterance.onerror = () => { waves.classList.remove('active'); };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+
+    selectCharacter('daenerys');
+
+    /* ============================================================
+       8. ACT 4: 3D DRAGON FLIGHT SIMULATOR (GUARANTEED VISUAL SCENE)
+       ============================================================ */
+    let dragonScene, dragonCamera, dragonRenderer, dragonMasterMesh;
+    let dragonRunLoop = false;
+    let dragonMouseX = 0, dragonMouseY = 0;
+
+    function startDragonFlightScene() {
+      const canvas = document.getElementById('dragon-three-canvas');
+      const box = canvas.parentElement;
+      const width = box.clientWidth || 800;
+      const height = box.clientHeight || 450;
+
+      if (!dragonRenderer) {
+        dragonScene = new THREE.Scene();
+        dragonCamera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+        dragonRenderer = new THREE.WebGLRenderer({ canvas, alpha: false, antialias: true });
+        dragonRenderer.setClearColor(0x0c0709, 1);
+        dragonRenderer.setSize(width, height);
+
+        // Volcanic lighting
+        const fireAmb = new THREE.PointLight(0xff4500, 3.5, 60);
+        fireAmb.position.set(0, 4, 6);
+        dragonScene.add(fireAmb);
+
+        const moonLight = new THREE.DirectionalLight(0xffd700, 1.2);
+        moonLight.position.set(-6, 10, -5);
+        dragonScene.add(moonLight);
+
+        const fillLight = new THREE.AmbientLight(0x3d1c10, 1.5);
+        dragonScene.add(fillLight);
+
+        // Volcanic terrain chasm
+        const floorGeo = new THREE.PlaneGeometry(120, 120, 16, 16);
+        const floorMat = new THREE.MeshStandardMaterial({
+          color: 0x1f0e08,
+          roughness: 0.9,
+          metalness: 0.1,
+          wireframe: true
+        });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.y = -6;
+        dragonScene.add(floor);
+
+        // Detailed 3D Dragon Model
+        const dragonGroup = new THREE.Group();
+
+        const blackScaleMat = new THREE.MeshStandardMaterial({ color: 0x242429, roughness: 0.4, metalness: 0.8 });
+        const redWingMat = new THREE.MeshStandardMaterial({ color: 0x9b111e, roughness: 0.5, metalness: 0.2, side: THREE.DoubleSide });
+        const hornMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, roughness: 0.3, metalness: 0.9 });
+
+        // Torso
+        const bodyGeo = new THREE.ConeGeometry(0.85, 4.5, 10);
+        const body = new THREE.Mesh(bodyGeo, blackScaleMat);
+        body.rotation.x = Math.PI / 2;
+        dragonGroup.add(body);
+
+        // Neck & Head
+        const headGeo = new THREE.ConeGeometry(0.55, 1.6, 8);
+        const head = new THREE.Mesh(headGeo, blackScaleMat);
+        head.position.set(0, 0.4, 2.5);
+        head.rotation.x = Math.PI / 2;
+        dragonGroup.add(head);
+
+        // Horns
+        const hornL = new THREE.Mesh(new THREE.ConeGeometry(0.12, 1.1, 4), hornMat);
+        hornL.position.set(-0.35, 0.9, 2.3);
+        hornL.rotation.set(-0.3, 0, -0.4);
+        const hornR = new THREE.Mesh(new THREE.ConeGeometry(0.12, 1.1, 4), hornMat);
+        hornR.position.set(0.35, 0.9, 2.3);
+        hornR.rotation.set(-0.3, 0, 0.4);
+        dragonGroup.add(hornL);
+        dragonGroup.add(hornR);
+
+        // Glowing Eyes
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), eyeMat);
+        eyeL.position.set(-0.25, 0.55, 2.8);
+        const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), eyeMat);
+        eyeR.position.set(0.25, 0.55, 2.8);
+        dragonGroup.add(eyeL);
+        dragonGroup.add(eyeR);
+
+        // Wings with joints
+        const wingL = new THREE.Mesh(new THREE.PlaneGeometry(3.8, 2.4), redWingMat);
+        wingL.position.set(-2.2, 0.4, 0.6);
+        wingL.rotation.x = Math.PI / 2.3;
+        const wingR = new THREE.Mesh(new THREE.PlaneGeometry(3.8, 2.4), redWingMat);
+        wingR.position.set(2.2, 0.4, 0.6);
+        wingR.rotation.x = Math.PI / 2.3;
+        dragonGroup.add(wingL);
+        dragonGroup.add(wingR);
+
+        dragonGroup.wingL = wingL;
+        dragonGroup.wingR = wingR;
+
+        dragonMasterMesh = dragonGroup;
+        dragonScene.add(dragonGroup);
+        dragonCamera.position.set(0, 2.2, 8);
+
+        // Mouse steering
+        box.addEventListener('mousemove', (e) => {
+          const rect = box.getBoundingClientRect();
+          dragonMouseX = ((e.clientX - rect.left) / rect.width - 0.5) * 4;
+          dragonMouseY = ((e.clientY - rect.top) / rect.height - 0.5) * -3;
+        });
+
+        box.addEventListener('touchmove', (e) => {
+          if (e.touches.length > 0) {
+            const rect = box.getBoundingClientRect();
+            dragonMouseX = ((e.touches[0].clientX - rect.left) / rect.width - 0.5) * 4;
+            dragonMouseY = ((e.touches[0].clientY - rect.top) / rect.height - 0.5) * -3;
+          }
+        });
+      } else {
+        dragonRenderer.setSize(width, height);
+        dragonCamera.aspect = width / height;
+        dragonCamera.updateProjectionMatrix();
+      }
+
+      if (!dragonRunLoop) {
+        dragonRunLoop = true;
+        let flightTime = 0;
+
+        function renderDragonLoop() {
+          requestAnimationFrame(renderDragonLoop);
+          flightTime += 0.08;
+
+          // Wing flapping
+          if (dragonMasterMesh) {
+            dragonMasterMesh.wingL.rotation.z = Math.sin(flightTime) * 0.5;
+            dragonMasterMesh.wingR.rotation.z = -Math.sin(flightTime) * 0.5;
+
+            // Smooth position following cursor
+            dragonMasterMesh.position.x += (dragonMouseX - dragonMasterMesh.position.x) * 0.08;
+            dragonMasterMesh.position.y += (dragonMouseY - dragonMasterMesh.position.y) * 0.08;
+
+            dragonMasterMesh.rotation.z = -dragonMasterMesh.position.x * 0.15;
+            dragonMasterMesh.rotation.x = dragonMasterMesh.position.y * 0.1;
+          }
+
+          dragonRenderer.render(dragonScene, dragonCamera);
+        }
+        renderDragonLoop();
+      }
+    }
+
+    function unleashDracarys() {
+      jukebox.playSfx('dracarys');
+      const blast = document.getElementById('dragon-flame-burst');
+      blast.style.opacity = '1';
+      setTimeout(() => { blast.style.opacity = '0'; }, 1500);
+
+      confetti({
+        particleCount: 220,
+        spread: 120,
+        origin: { y: 0.6 },
+        colors: ['#ff4500', '#ff0000', '#ffd700']
+      });
+    }
+
+    /* ============================================================
+       9. ACT 5: CROSSBOW HUNT MINI-GAME
+       ============================================================ */
+    const cbCanv = document.getElementById('crossbow-play-canvas');
+    const cbCtx = cbCanv.getContext('2d');
+    let huntActive = false;
+    let huntScore = 0;
+    let huntSeconds = 30;
+    let huntTimer = null;
+    let huntTargets = [];
+    let huntCrosshair = { x: 200, y: 200 };
+
+    function resizeCrossbow() {
+      const rect = cbCanv.parentElement.getBoundingClientRect();
+      cbCanv.width = rect.width;
+      cbCanv.height = rect.height;
+    }
+    window.addEventListener('resize', resizeCrossbow);
+
+    cbCanv.addEventListener('mousemove', (e) => {
+      const r = cbCanv.getBoundingClientRect();
+      huntCrosshair.x = e.clientX - r.left;
+      huntCrosshair.y = e.clientY - r.top;
+    });
+
+    cbCanv.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        const r = cbCanv.getBoundingClientRect();
+        huntCrosshair.x = e.touches[0].clientX - r.left;
+        huntCrosshair.y = e.touches[0].clientY - r.top;
+      }
+    });
+
+    cbCanv.addEventListener('click', fireCrossbowBolt);
+    cbCanv.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) {
+        const r = cbCanv.getBoundingClientRect();
+        huntCrosshair.x = e.touches[0].clientX - r.left;
+        huntCrosshair.y = e.touches[0].clientY - r.top;
+      }
+      fireCrossbowBolt();
+    });
+
+    function beginCrossbowHunt() {
+      resizeCrossbow();
+      huntActive = true;
+      huntScore = 0;
+      huntSeconds = 30;
+      huntTargets = [];
+      document.getElementById('cb-score-val').textContent = '0';
+      document.getElementById('cb-time-val').textContent = '30s';
+      document.getElementById('cb-rank-val').textContent = 'Marksman';
+      document.getElementById('crossbow-start-screen').style.display = 'none';
+
+      jukebox.playSfx('crossbow');
+
+      if (huntTimer) clearInterval(huntTimer);
+      huntTimer = setInterval(() => {
+        huntSeconds--;
+        document.getElementById('cb-time-val').textContent = huntSeconds + 's';
+        if (huntSeconds <= 0) completeCrossbowHunt();
+      }, 1000);
+
+      spawnHuntTargets();
+      renderHuntGame();
+    }
+
+    function spawnHuntTargets() {
+      if (!huntActive) return;
+      if (huntTargets.length < 5) {
+        const pool = [
+          { type: 'wight', color: '#87ceeb', pts: 150, r: 25, icon: '❄️' },
+          { type: 'ale', color: '#ffd700', pts: 200, r: 22, icon: '🍺' },
+          { type: 'dragon', color: '#ff4500', pts: 300, r: 20, icon: '🐉' },
+          { type: 'lannister', color: '#c41e3a', pts: 180, r: 24, icon: '🦁' }
+        ];
+        const item = pool[Math.floor(Math.random() * pool.length)];
+        huntTargets.push({
+          x: Math.random() * (cbCanv.width - 60) + 30,
+          y: Math.random() * (cbCanv.height - 80) + 40,
+          vx: (Math.random() - 0.5) * 3.5,
+          vy: (Math.random() - 0.5) * 2.5,
+          ...item
+        });
+      }
+      setTimeout(spawnHuntTargets, 650);
+    }
+
+    function fireCrossbowBolt() {
+      if (!huntActive) return;
+      jukebox.playSfx('crossbow');
+
+      for (let i = huntTargets.length - 1; i >= 0; i--) {
+        const t = huntTargets[i];
+        const dist = Math.hypot(huntCrosshair.x - t.x, huntCrosshair.y - t.y);
+        if (dist <= t.r + 15) {
+          jukebox.playSfx('hit');
+          huntScore += t.pts;
+          document.getElementById('cb-score-val').textContent = huntScore;
+
+          confetti({
+            particleCount: 15,
+            spread: 30,
+            origin: {
+              x: (cbCanv.getBoundingClientRect().left + t.x) / window.innerWidth,
+              y: (cbCanv.getBoundingClientRect().top + t.y) / window.innerHeight
+            }
+          });
+
+          huntTargets.splice(i, 1);
+          break;
+        }
+      }
+    }
+
+    function completeCrossbowHunt() {
+      huntActive = false;
+      clearInterval(huntTimer);
+      jukebox.playSfx('fanfare');
+
+      let rank = "Champion of Westeros";
+      if (huntScore >= 1800) rank = "Master of the Hunt";
+      else if (huntScore >= 900) rank = "Lannister Marksman";
+
+      document.getElementById('cb-rank-val').textContent = rank;
+      document.getElementById('cb-splash-title').textContent = "TRIAL COMPLETED!";
+      document.getElementById('cb-splash-desc').innerHTML = `
+        Royal Score: <strong style="color:#ffd778; font-size:1.4rem;">${huntScore}</strong><br>
+        Title Conferred: <strong style="color:#ff4500;">${rank}</strong>
+      `;
+      document.getElementById('crossbow-start-screen').style.display = 'flex';
+    }
+
+    function renderHuntGame() {
+      cbCtx.clearRect(0, 0, cbCanv.width, cbCanv.height);
+      cbCtx.fillStyle = '#0c0a0e';
+      cbCtx.fillRect(0, 0, cbCanv.width, cbCanv.height);
+
+      huntTargets.forEach(t => {
+        t.x += t.vx;
+        t.y += t.vy;
+        if (t.x < 25 || t.x > cbCanv.width - 25) t.vx *= -1;
+        if (t.y < 35 || t.y > cbCanv.height - 35) t.vy *= -1;
+
+        cbCtx.save();
+        cbCtx.beginPath();
+        cbCtx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
+        cbCtx.fillStyle = t.color;
+        cbCtx.shadowColor = t.color;
+        cbCtx.shadowBlur = 12;
+        cbCtx.fill();
+        cbCtx.lineWidth = 2;
+        cbCtx.strokeStyle = '#fff';
+        cbCtx.stroke();
+
+        cbCtx.font = `${t.r}px Arial`;
+        cbCtx.textAlign = 'center';
+        cbCtx.textBaseline = 'middle';
+        cbCtx.fillText(t.icon, t.x, t.y + 2);
+        cbCtx.restore();
+      });
+
+      cbCtx.save();
+      cbCtx.strokeStyle = '#ffd778';
+      cbCtx.lineWidth = 2;
+      cbCtx.beginPath();
+      cbCtx.arc(huntCrosshair.x, huntCrosshair.y, 20, 0, Math.PI * 2);
+      cbCtx.moveTo(huntCrosshair.x - 28, huntCrosshair.y);
+      cbCtx.lineTo(huntCrosshair.x + 28, huntCrosshair.y);
+      cbCtx.moveTo(huntCrosshair.x, huntCrosshair.y - 28);
+      cbCtx.lineTo(huntCrosshair.x, huntCrosshair.y + 28);
+      cbCtx.stroke();
+      cbCtx.restore();
+
+      if (huntActive) requestAnimationFrame(renderHuntGame);
+    }
+
+    /* ============================================================
+       10. ACT 6: 3D IRON THRONE & CANDLE BLOW
+       ============================================================ */
+    let throneInit = false;
+
+    function initThrone3D() {
+      if (throneInit) return;
+      throneInit = true;
+
+      const canvas = document.getElementById('throne-3d-canvas');
+      const rect = canvas.getBoundingClientRect();
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, rect.width / rect.height, 0.1, 100);
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setSize(rect.width, rect.height);
+
+      const torch1 = new THREE.PointLight(0xffa500, 3, 30);
+      torch1.position.set(-3, 3, 5);
+      scene.add(torch1);
+
+      const torch2 = new THREE.PointLight(0xff4500, 3, 30);
+      torch2.position.set(3, 3, 5);
+      scene.add(torch2);
+
+      const group = new THREE.Group();
+      const ironMat = new THREE.MeshStandardMaterial({ color: 0x2d2e33, metalness: 0.9, roughness: 0.35 });
+
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.6, 0.6, 8), ironMat);
+      base.position.y = -1.2;
+      group.add(base);
+
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.4, 1.4), ironMat);
+      seat.position.y = -0.7;
+      group.add(seat);
+
+      for (let i = -12; i <= 12; i++) {
+        const h = 3.0 - Math.abs(i) * 0.12;
+        const blade = new THREE.Mesh(new THREE.BoxGeometry(0.12, h, 0.05), ironMat);
+        blade.position.set(i * 0.09, h / 2 - 0.7, -0.6 - Math.abs(i) * 0.04);
+        blade.rotation.z = -i * 0.035;
+        group.add(blade);
+      }
+
+      scene.add(group);
+      camera.position.set(0, 0.5, 6);
+
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.enableZoom = false;
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 1.2;
+
+      function renderThrone() {
+        requestAnimationFrame(renderThrone);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      renderThrone();
+    }
+
+    let candleCount = 0;
+
+    function quenchCandle(id) {
+      const wick = document.getElementById(`wick-${id}`);
+      if (!wick.classList.contains('extinguished')) {
+        wick.classList.add('extinguished');
+        candleCount++;
+        jukebox.playSfx('sealBreak');
+        if (candleCount >= 3) {
+          triggerCoronationFeast();
+        }
+      }
+    }
+
+    function quenchAllCandles() {
+      for (let i = 1; i <= 3; i++) quenchCandle(i);
+    }
+
+    function triggerCoronationFeast() {
+      jukebox.playSfx('fanfare');
+      document.getElementById('coronation-post-announcement').style.display = 'block';
+      document.getElementById('btn-blow-all').style.display = 'none';
+
+      confetti({
+        particleCount: 250,
+        spread: 120,
+        origin: { y: 0.65 },
+        colors: ['#ffd700', '#c41e3a', '#b8860b', '#ffffff']
+      });
+    }
+
+    /* ============================================================
+       11. ACT 7: MEMORABLE ROYAL CERTIFICATE EXPORTER (DOWNLOAD PNG)
+       ============================================================ */
+    function exportRoyalCertificatePNG() {
+      jukebox.playSfx('fanfare');
+      const name = nameBox.value.trim() || "KING AADESH";
+
+      // Draw high resolution 1200x800 parchment canvas
+      const cvs = document.createElement('canvas');
+      cvs.width = 1200;
+      cvs.height = 800;
+      const ctx = cvs.getContext('2d');
+
+      // Parchment background gradient
+      const bgGrad = ctx.createRadialGradient(600, 400, 50, 600, 400, 700);
+      bgGrad.addColorStop(0, '#f2e8d3');
+      bgGrad.addColorStop(0.7, '#e4d2b2');
+      bgGrad.addColorStop(1, '#c5a97d');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 1200, 800);
+
+      // Ornate Border
+      ctx.lineWidth = 14;
+      ctx.strokeStyle = '#4a3219';
+      ctx.strokeRect(30, 30, 1140, 740);
+
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#b8860b';
+      ctx.strokeRect(48, 48, 1104, 704);
+
+      // Header
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#6e4e2b';
+      ctx.font = 'bold 20px serif';
+      ctx.fillText("BY DECREE OF THE IRON THRONE OF WESTEROS", 600, 110);
+
+      ctx.fillStyle = '#38220c';
+      ctx.font = 'bold 44px serif';
+      ctx.fillText("ROYAL NAMEDAY PROCLAMATION", 600, 165);
+
+      // Sovereign Name
+      ctx.fillStyle = '#8b0000';
+      ctx.font = '900 52px serif';
+      ctx.fillText(name.toUpperCase(), 600, 245);
+
+      // Proclamation Text
+      ctx.fillStyle = '#26170d';
+      ctx.font = '24px serif';
+      ctx.fillText("Be it proclaimed across the Seven Kingdoms, from Winterfell to Sunspear:", 600, 310);
+      ctx.fillText("Today, the realm bends its knee to celebrate the true Sovereign of Westeros.", 600, 355);
+      ctx.fillText("May your steel never dull, your dragons fly true, and your cup never run empty.", 600, 400);
+
+      ctx.fillStyle = '#8b0000';
+      ctx.font = 'bold 32px serif';
+      ctx.fillText("HAPPY BIRTHDAY, YOUR GRACE!", 600, 470);
+
+      // Seal Stamp
+      ctx.fillStyle = 'rgba(178, 34, 34, 0.85)';
+      ctx.beginPath();
+      ctx.arc(600, 580, 55, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffd778';
+      ctx.font = 'bold 16px serif';
+      ctx.fillText("IRON THRONE", 600, 575);
+      ctx.fillText("ROYAL SEAL", 600, 595);
+
+      // Signatures
+      ctx.fillStyle = '#4a2d13';
+      ctx.font = 'bold 18px serif';
+      ctx.fillText("Daenerys Targaryen", 200, 680);
+      ctx.fillText("Jon Snow", 400, 680);
+      ctx.fillText("Ser Jaime Lannister", 800, 680);
+      ctx.fillText("Tyrion Lannister", 1000, 680);
+
+      ctx.fillStyle = '#7d5e3c';
+      ctx.font = 'italic 14px serif';
+      ctx.fillText("House Targaryen", 200, 705);
+      ctx.fillText("King in the North", 400, 705);
+      ctx.fillText("Lord Commander Kingsguard", 800, 705);
+      ctx.fillText("Hand of the King", 1000, 705);
+
+      // Convert to image download
+      const a = document.createElement('a');
+      a.download = `Royal_Decree_${name.replace(/\s+/g, '_')}.png`;
+      a.href = cvs.toDataURL('image/png');
+      a.click();
+
+      confetti({ particleCount: 100, spread: 80 });
+    }
+
+    navigateToChapter(0);
+  </script>
+</body>
+</html>
